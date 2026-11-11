@@ -1,0 +1,2249 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Mother's Care - Sahabat Kehamilan Tenang & Terpantau</title>
+  <meta name="description" content="Aplikasi pemantau kehamilan cerdas, jadwal ANC standar Buku KIA Kemenkes, pengingat suplemen zat besi, jurnal tensi dan tendangan janin, serta persiapan persalinan.">
+  <meta name="theme-color" content="#FB7185">
+
+  <!-- Google Fonts: Plus Jakarta Sans & Quicksand -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Quicksand"', 'sans-serif'],
+          },
+          colors: {
+            rose: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              200: '#fecdd3',
+              300: '#fda4af',
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+            },
+            sage: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              300: '#86efac',
+              400: '#4ade80',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+            },
+            warm: {
+              cream: '#FFFDF9',
+              card: '#FFFFFF',
+              sand: '#F8F6F0',
+            }
+          },
+          boxShadow: {
+            'soft': '0 4px 20px -2px rgba(244, 114, 182, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.04)',
+            'float': '0 10px 25px -5px rgba(244, 63, 94, 0.18), 0 8px 10px -6px rgba(244, 63, 94, 0.1)',
+            'card': '0 2px 12px rgba(0, 0, 0, 0.05)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Chart.js for Vitals & Weight progression -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* Smooth transitions and custom scrollbars */
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      background-color: #FAF8F5;
+      color: #1F2937;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .gradient-hero {
+      background: linear-gradient(135deg, #FFF1F2 0%, #FFE4E6 50%, #FEE2E2 100%);
+    }
+    .gradient-card-pink {
+      background: linear-gradient(135deg, #FFF5F5 0%, #FFF0F5 100%);
+    }
+    .gradient-card-sage {
+      background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%);
+    }
+    .gradient-card-amber {
+      background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+    }
+    .badge-pulse {
+      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse-ring {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.85; }
+    }
+    
+    /* Print Stylesheet for Midwife Mode */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-midwife-report, #printable-midwife-report * {
+        visibility: visible;
+      }
+      #printable-midwife-report {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        display: block !important;
+        background: white !important;
+        padding: 20px !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start text-slate-800 antialiased font-sans selection:bg-rose-200">
+
+  <!-- Desktop Emulation Shell: Centers and constrains to a polished mobile viewport on wide screens with desktop helper sidebar -->
+  <div class="w-full max-w-md md:max-w-xl lg:max-w-2xl bg-white min-h-screen shadow-2xl relative flex flex-col border-x border-rose-100/60 pb-28">
+
+    <!-- TOP APP BAR -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-rose-100 px-4 py-3 flex items-center justify-between transition-all duration-200">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-rose-400 flex items-center justify-center text-white shadow-md shadow-rose-500/20">
+          <i data-lucide="heart-handshake" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-1.5">
+            <h1 class="text-lg font-bold font-display tracking-tight text-slate-900">Mother's Care</h1>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-700">Buku KIA</span>
+          </div>
+          <p class="text-[11px] text-slate-500 flex items-center gap-1" id="top-user-greeting">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+            Halo, <strong class="text-slate-700 font-semibold" id="header-mom-name">Bunda Anisa</strong>
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Icons -->
+      <div class="flex items-center space-x-1.5">
+        <!-- Language Switcher -->
+        <button id="lang-toggle-btn" onclick="toggleLanguage()" title="Ganti Bahasa / Switch Language" class="p-2 rounded-xl text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition border border-slate-200 text-xs font-bold flex items-center gap-1">
+          <span id="lang-flag">🇮🇩</span>
+          <span id="lang-code" class="text-[11px]">ID</span>
+        </button>
+
+        <!-- Midwife Mode / Export Button -->
+        <button onclick="openMidwifeReportModal()" title="Cetak Ringkasan Bidan (Buku KIA)" class="p-2 rounded-xl text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition border border-slate-200">
+          <i data-lucide="file-text" class="w-4 h-4"></i>
+        </button>
+
+        <!-- SOS Quick Button -->
+        <button onclick="switchTab('warning')" title="Menu Darurat SOS" class="p-2 rounded-xl text-white bg-rose-500 hover:bg-rose-600 transition shadow-sm shadow-rose-500/30">
+          <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Settings / Profile -->
+        <button onclick="openSettingsModal()" title="Pengaturan Profil Kehamilan" class="p-2 rounded-xl text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition border border-slate-200">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- CRITICAL ALERT BANNER (Dynamically shown if Blood Pressure / Tanda Bahaya detected) -->
+    <div id="urgent-vitals-alert" class="hidden bg-red-500 text-white px-4 py-2.5 text-xs flex items-center justify-between font-medium shadow-md">
+      <div class="flex items-center space-x-2">
+        <i data-lucide="alert-octagon" class="w-4 h-4 flex-shrink-0 animate-bounce"></i>
+        <span id="urgent-alert-text">Perhatian: Tekanan darah terakhir tinggi (≥140/90). Harap segera hubungi bidan/dokter!</span>
+      </div>
+      <button onclick="switchTab('warning')" class="ml-2 underline font-bold whitespace-nowrap hover:text-red-100">Cek SOS</button>
+    </div>
+
+    <!-- MAIN APP CONTENT AREA (Single Page with Dynamic Tabs) -->
+    <main class="flex-1 px-4 py-3 space-y-4">
+
+      <!-- ================= TAB 1: BERANDA / DASHBOARD ================= -->
+      <section id="tab-home" class="space-y-4 animate-fade">
+
+        <!-- EDD HERO CARD (Naegele Calculation & Fetal Benchmark) -->
+        <div class="relative overflow-hidden rounded-3xl gradient-hero p-5 border border-rose-200/80 shadow-soft">
+          <!-- Decorative Background Elements -->
+          <div class="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-rose-300/20 blur-xl pointer-events-none"></div>
+          <div class="absolute -left-6 -top-6 w-24 h-24 rounded-full bg-amber-200/20 blur-lg pointer-events-none"></div>
+
+          <div class="relative z-10">
+            <div class="flex items-center justify-between mb-3">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/90 text-rose-700 shadow-sm border border-rose-200/60">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-rose-500"></i>
+                <span id="gestational-trimester-badge">Trimester 2</span>
+              </span>
+              <span class="text-xs font-medium text-rose-900 bg-rose-100/80 px-2.5 py-1 rounded-full">
+                HPL: <strong id="hero-edd-date" class="font-bold">28 April 2027</strong>
+              </span>
+            </div>
+
+            <!-- Big Gestational Age Display -->
+            <div class="flex items-baseline space-x-2 mb-1">
+              <span id="hero-weeks" class="text-4xl font-extrabold text-slate-900 font-display tracking-tight">24</span>
+              <span class="text-xl font-bold text-rose-600">Minggu</span>
+              <span id="hero-days" class="text-2xl font-bold text-slate-700">3</span>
+              <span class="text-sm font-semibold text-slate-500">Hari</span>
+            </div>
+
+            <p class="text-xs text-slate-600 mb-4 flex items-center gap-1">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-rose-400"></i>
+              <span id="hero-countdown-text">Tersisa 110 hari lagi menuju hari persalinan</span>
+            </p>
+
+            <!-- Baby Fruit/Vegetable Size Benchmark -->
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-3.5 border border-rose-100 flex items-center space-x-3.5 shadow-sm">
+              <div class="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-3xl flex-shrink-0 shadow-inner" id="hero-fruit-icon">
+                🌽
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-semibold text-rose-500 uppercase tracking-wider" id="hero-fruit-label">Perkembangan Janin</span>
+                  <span class="text-[11px] text-slate-400" id="hero-baby-length">~30 cm • 600 gram</span>
+                </div>
+                <h4 class="text-sm font-bold text-slate-800 truncate" id="hero-fruit-name">Sebesar Jagung Manis</h4>
+                <p class="text-[11px] text-slate-600 line-clamp-2 mt-0.5" id="hero-fruit-desc">
+                  Indra pendengaran si kecil semakin peka! Bayi dapat mendengar detak jantung Bunda dan suara obrolan Ayah.
+                </p>
+              </div>
+            </div>
+
+            <!-- Quick Action Bar under EDD -->
+            <div class="mt-3.5 grid grid-cols-2 gap-2">
+              <button onclick="openKickModal()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white hover:bg-rose-50 text-rose-700 text-xs font-semibold border border-rose-200 transition shadow-sm">
+                <i data-lucide="activity" class="w-3.5 h-3.5 text-rose-500"></i>
+                <span id="quick-kick-btn-text">Hitung 10 Tendangan</span>
+              </button>
+              <button onclick="openVitalsModal()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold transition shadow-sm shadow-rose-500/20">
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+                <span id="quick-log-btn-text">Catat Tensi & BB</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPCOMING VISIT / NEXT APPOINTMENT COUNTDOWN BANNER -->
+        <div id="next-visit-card" class="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50/90 via-sky-50 to-indigo-50/80 p-4 shadow-sm relative overflow-hidden">
+          <div class="flex items-start justify-between">
+            <div class="flex items-start space-x-3">
+              <div class="w-10 h-10 rounded-xl bg-blue-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5">
+                <i data-lucide="calendar" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800" id="next-visit-tag">
+                  Jadwal Kontrol Berikutnya
+                </span>
+                <h3 class="text-sm font-bold text-slate-900 mt-1" id="next-visit-title">Pemeriksaan USG & Laboratorium T2</h3>
+                <p class="text-xs text-slate-600 mt-0.5" id="next-visit-datetime">
+                  <i data-lucide="map-pin" class="w-3 h-3 inline text-slate-400 mr-0.5"></i>
+                  <span id="next-visit-provider">Bidan Siti Aminah, S.Tr.Keb • Puskesmas Sehat</span>
+                </p>
+                <div class="flex items-center gap-2 mt-2">
+                  <span class="text-xs font-bold text-blue-700 bg-white px-2 py-0.5 rounded-full border border-blue-200" id="next-visit-countdown">
+                    ⏳ 4 Hari Lagi (15 Nov 2026)
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 pt-3 border-t border-blue-200/60 flex items-center justify-between">
+            <span class="text-[11px] text-slate-500">Bawa: Buku KIA, KTP & BPJS</span>
+            <button onclick="sendVisitWhatsAppReminder()" class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-lg transition">
+              <i data-lucide="message-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
+              <span>Kirim Pengingat WA</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- TODAY'S SUPPLEMENT TRACKER (Quick Tick on Home) -->
+        <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-card">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+              <div class="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center">
+                <i data-lucide="pill" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-900" id="home-supplements-title">Suplemen Hamil Hari Ini</h3>
+                <p class="text-[11px] text-slate-500" id="home-supplements-sub">Cegah anemia dengan rutin minum Tablet Tambah Darah (TTD)</p>
+              </div>
+            </div>
+            <button onclick="switchTab('supplements')" class="text-xs font-semibold text-rose-600 hover:text-rose-700">Lihat Semua →</button>
+          </div>
+
+          <!-- Quick List of Today's Pills -->
+          <div id="home-pills-list" class="space-y-2.5">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <!-- Compliance Summary Bar -->
+          <div class="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span class="text-slate-500 flex items-center gap-1">
+              <i data-lucide="flame" class="w-3.5 h-3.5 text-amber-500"></i>
+              <span>Streak Rutin: <strong class="text-slate-800 font-bold" id="home-streak-days">14 Hari Berturut-turut</strong></span>
+            </span>
+            <span class="font-bold text-emerald-600" id="home-adherence-rate">94% Kepatuhan 30 Hari</span>
+          </div>
+        </div>
+
+        <!-- RECENT VITALS & CLINICAL SNAPSHOT -->
+        <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-card">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+              <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                <i data-lucide="heart-pulse" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-900" id="home-vitals-title">Jurnal Tensi & Berat Badan</h3>
+                <p class="text-[11px] text-slate-500">Catatan terakhir untuk ditunjukkan ke Bidan</p>
+              </div>
+            </div>
+            <button onclick="switchTab('journal')" class="text-xs font-semibold text-rose-600 hover:text-rose-700">Lihat Grafik →</button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 flex flex-col justify-between">
+              <span class="text-[11px] font-medium text-slate-500">Tekanan Darah (Tensi)</span>
+              <div class="flex items-baseline space-x-1 my-1">
+                <span class="text-xl font-bold text-slate-900" id="home-latest-bp">115/75</span>
+                <span class="text-[10px] text-slate-400">mmHg</span>
+              </div>
+              <span id="home-bp-status-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700 w-fit">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Normal Sehat
+              </span>
+            </div>
+
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 flex flex-col justify-between">
+              <span class="text-[11px] font-medium text-slate-500">Berat Badan Sekarang</span>
+              <div class="flex items-baseline space-x-1 my-1">
+                <span class="text-xl font-bold text-slate-900" id="home-latest-weight">58.4</span>
+                <span class="text-[10px] text-slate-400">kg</span>
+              </div>
+              <span class="text-[10px] text-slate-500 font-medium" id="home-weight-gain-text">
+                Kenaikan: +6.4 kg dari awal
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK EMERGENCY RED-FLAG BANNER -->
+        <div class="bg-rose-50 border border-rose-200/80 rounded-2xl p-4 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+              <i data-lucide="shield-alert" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-slate-900" id="home-warning-title">Ragu dengan gejala yang Anda rasakan?</h4>
+              <p class="text-[11px] text-slate-600" id="home-warning-desc">Pelajari panduan tanda bahaya & kontak cepat Bidan/RS.</p>
+            </div>
+          </div>
+          <button onclick="switchTab('warning')" class="px-3 py-1.5 bg-white text-rose-700 border border-rose-300 hover:bg-rose-100 rounded-xl text-xs font-bold transition flex-shrink-0 ml-2">
+            Panduan SOS
+          </button>
+        </div>
+
+      </section>
+
+      <!-- ================= TAB 2: JADWAL ANC & PEMERIKSAAN ================= -->
+      <section id="tab-schedule" class="space-y-4 hidden animate-fade">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900" id="anc-page-title">Jadwal Pemeriksaan Kehamilan (ANC)</h2>
+            <p class="text-xs text-slate-500" id="anc-page-sub">Standar 6x Kunjungan Kemenkes RI (2x Dokter, 4x Bidan)</p>
+          </div>
+          <button onclick="openAddVisitModal()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold transition shadow-sm">
+            <i data-lucide="calendar-plus" class="w-3.5 h-3.5"></i>
+            <span>Tambah Jadwal</span>
+          </button>
+        </div>
+
+        <!-- ANC Overview Card with Progress -->
+        <div class="rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 text-white p-4 shadow-soft">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-rose-100">Capaian Kunjungan ANC Standar</span>
+            <span class="text-xs font-bold bg-white/20 px-2.5 py-0.5 rounded-full" id="anc-completion-text">3 dari 6 Selesai</span>
+          </div>
+          <div class="w-full bg-white/30 h-2.5 rounded-full overflow-hidden">
+            <div id="anc-progress-bar" class="bg-white h-full rounded-full transition-all duration-500" style="width: 50%;"></div>
+          </div>
+          <p class="text-[11px] text-rose-100 mt-2">
+            Memastikan deteksi dini risiko preeklampsia, anemia, diabetes gestasional, dan posisi janin.
+          </p>
+        </div>
+
+        <!-- Timeline of Visits -->
+        <div id="anc-timeline-container" class="space-y-3 relative pl-4 before:content-[''] before:absolute before:left-7 before:top-4 before:bottom-4 before:w-0.5 before:bg-slate-200">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- ================= TAB 3: SUPLEMEN & TABLET TAMBAH DARAH ================= -->
+      <section id="tab-supplements" class="space-y-4 hidden animate-fade">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900" id="supp-page-title">Pengingat Suplemen & Obat Hamil</h2>
+            <p class="text-xs text-slate-500" id="supp-page-sub">Konsisten minum setiap hari untuk ibu & buah hati</p>
+          </div>
+          <button onclick="openAddSuppModal()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold transition shadow-sm">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>Tambah Suplemen</span>
+          </button>
+        </div>
+
+        <!-- Iron Tablet Recommendation / Tips Card -->
+        <div class="bg-amber-50 border border-amber-200/90 rounded-2xl p-4 flex items-start space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i data-lucide="info" class="w-5 h-5"></i>
+          </div>
+          <div class="text-xs text-amber-900 space-y-1">
+            <h4 class="font-bold text-amber-950">Tips Minum Tablet Tambah Darah (TTD):</h4>
+            <p class="text-[11px] text-amber-800 leading-relaxed">
+              Minum TTD bersama air putih atau jus jeruk (vitamin C membantu penyerapan zat besi). <strong>Hindari</strong> minum bersama teh, kopi, atau susu karena dapat menghambat penyerapan!
+            </p>
+          </div>
+        </div>
+
+        <!-- Adherence Statistics Cards -->
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+            <span class="text-[10px] font-semibold text-slate-400 uppercase">Hari Ini</span>
+            <div class="text-lg font-bold text-slate-900 mt-0.5" id="supp-stat-today">2/3</div>
+            <span class="text-[10px] text-slate-500">Tercatat</span>
+          </div>
+          <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+            <span class="text-[10px] font-semibold text-slate-400 uppercase">Streak</span>
+            <div class="text-lg font-bold text-amber-500 mt-0.5 flex items-center justify-center gap-0.5" id="supp-stat-streak">
+              <span>🔥 14</span>
+            </div>
+            <span class="text-[10px] text-slate-500">Hari Rutin</span>
+          </div>
+          <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+            <span class="text-[10px] font-semibold text-slate-400 uppercase">Bulan Ini</span>
+            <div class="text-lg font-bold text-emerald-600 mt-0.5" id="supp-stat-month">94%</div>
+            <span class="text-[10px] text-slate-500">Kepatuhan</span>
+          </div>
+        </div>
+
+        <!-- Full List of Supplements -->
+        <div id="supplements-full-list" class="space-y-3">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- ================= TAB 4: JURNAL KESEHATAN & GRAFIK KLINIS ================= -->
+      <section id="tab-journal" class="space-y-4 hidden animate-fade">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900" id="journal-page-title">Jurnal Medis & Grafik Kesehatan</h2>
+            <p class="text-xs text-slate-500" id="journal-page-sub">Pantau tekanan darah, kenaikan berat badan, & tendangan</p>
+          </div>
+          <button onclick="openVitalsModal()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold transition shadow-sm">
+            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+            <span>Catat Baru</span>
+          </button>
+        </div>
+
+        <!-- 10-Kick Counter Spotlight Card -->
+        <div class="bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200/80 rounded-2xl p-4 shadow-sm">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-[10px] font-bold text-rose-600 uppercase tracking-wider">Metode Cardiff 10-Kicks</span>
+              <h3 class="text-sm font-bold text-slate-900">Penghitung 10 Gerakan Janin (Kick Counter)</h3>
+              <p class="text-xs text-slate-600 mt-0.5">Janin sehat biasanya menendang minimal 10 kali dalam 2 jam saat ibu santai.</p>
+            </div>
+            <button onclick="openKickModal()" class="px-3 py-1.5 bg-rose-500 text-white rounded-xl text-xs font-bold hover:bg-rose-600 transition shadow-sm flex items-center gap-1">
+              <i data-lucide="play" class="w-3 h-3 fill-white"></i>
+              Mulai Sesi
+            </button>
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-rose-200/60 flex items-center justify-between text-xs text-slate-600">
+            <span>Sesi Terakhir: <strong class="text-slate-900 font-semibold" id="last-kick-session-info">Kemarin (10 tendangan dalam 28 menit)</strong></span>
+            <span class="text-emerald-700 font-semibold bg-emerald-100/80 px-2 py-0.5 rounded-full">Aktif Baik</span>
+          </div>
+        </div>
+
+        <!-- Blood Pressure Chart Card -->
+        <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-card">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Grafik Tekanan Darah (Tensi)</h3>
+              <p class="text-[11px] text-slate-400">Garis merah putus-putus batas waspada preeklampsia (140/90 mmHg)</p>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">Aman Terpantau</span>
+          </div>
+          <div class="h-52 w-full">
+            <canvas id="bpChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Weight Gain Chart Card -->
+        <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-card">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Grafik Kenaikan Berat Badan</h3>
+              <p class="text-[11px] text-slate-400">Dibandingkan dengan standar kenaikan trimester</p>
+            </div>
+            <span class="text-[10px] font-semibold text-slate-500" id="weight-bmi-badge">BMI Normal (11.5 - 16 kg)</span>
+          </div>
+          <div class="h-52 w-full">
+            <canvas id="weightChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Recent Logs History Table -->
+        <div class="bg-white rounded-2xl border border-slate-100 p-4 shadow-card">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-slate-900">Riwayat Catatan Harian</h3>
+            <button onclick="openMidwifeReportModal()" class="text-xs font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1">
+              <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+              Format Bidan
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="border-b border-slate-100 text-slate-400 text-[11px]">
+                  <th class="pb-2 font-medium">Tanggal</th>
+                  <th class="pb-2 font-medium">Tensi</th>
+                  <th class="pb-2 font-medium">BB</th>
+                  <th class="pb-2 font-medium">Gejala & Mood</th>
+                </tr>
+              </thead>
+              <tbody id="vitals-table-body" class="divide-y divide-slate-100 text-slate-700">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 5: TANDA BAHAYA & DARURAT SOS ================= -->
+      <section id="tab-warning" class="space-y-4 hidden animate-fade">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900" id="warning-page-title">Tanda Bahaya & Tindakan Darurat</h2>
+            <p class="text-xs text-slate-500" id="warning-page-sub">Panduan triase kehamilan untuk mengenali sinyal tubuh</p>
+          </div>
+        </div>
+
+        <!-- SPEED DIAL SOS BAR -->
+        <div class="bg-gradient-to-br from-rose-600 via-rose-500 to-red-600 rounded-2xl text-white p-4 shadow-float">
+          <div class="flex items-center space-x-2.5 mb-2">
+            <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center animate-pulse">
+              <i data-lucide="phone-call" class="w-4 h-4 text-white"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-extrabold uppercase tracking-wide">Panggilan Cepat Darurat Kehamilan</h3>
+              <p class="text-[11px] text-rose-100">Hubungi langsung nomor siaga di bawah dalam 1 klik</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 mt-3" id="emergency-speed-dial-buttons">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <div class="mt-3 pt-2.5 border-t border-rose-400/40 flex items-center justify-between">
+            <button onclick="triggerEmergencySOSWhatsApp()" class="w-full bg-white text-rose-700 hover:bg-rose-50 py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
+              <i data-lucide="send" class="w-3.5 h-3.5 text-rose-600"></i>
+              <span>Kirim Pesan Darurat Otomatis ke Suami / Bidan via WA</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- TRIAGE GUIDE ACCORDION (RED, YELLOW, GREEN) -->
+        <div class="space-y-3">
+          <!-- 1. RED TIER (GAWAT DARURAT - SEGERA KE IGD RS) -->
+          <div class="rounded-2xl border-2 border-red-300 bg-red-50/70 p-4 shadow-sm">
+            <div class="flex items-center space-x-2.5 mb-2 text-red-900">
+              <span class="w-3 h-3 rounded-full bg-red-600 animate-ping"></span>
+              <h3 class="text-sm font-extrabold text-red-900">🔴 TANDA BAHAYA MERAH (SEGERA KE IGD / RS PONEK 24 JAM)</h3>
+            </div>
+            <p class="text-xs text-red-800 mb-3 leading-relaxed">
+              Jika mengalami salah satu gejala di bawah ini, <strong>JANGAN MENUNGGU</strong>. Langsung menuju IGD fasilitas kesehatan terdekat:
+            </p>
+            <ul class="text-xs text-slate-800 space-y-2 list-none">
+              <li class="flex items-start gap-2 bg-white/80 p-2 rounded-xl border border-red-200">
+                <i data-lucide="alert-octagon" class="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5"></i>
+                <div>
+                  <strong>Perdarahan dari jalan lahir:</strong> Darah segar mengalir merah terang (bukan sekadar flek bercak).
+                </div>
+              </li>
+              <li class="flex items-start gap-2 bg-white/80 p-2 rounded-xl border border-red-200">
+                <i data-lucide="alert-octagon" class="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5"></i>
+                <div>
+                  <strong>Trias Preeklampsia Berat:</strong> Sakit kepala hebat yang tidak hilang, pandangan kabur/silau, dan rasa nyeri menusuk di ulu hati.
+                </div>
+              </li>
+              <li class="flex items-start gap-2 bg-white/80 p-2 rounded-xl border border-red-200">
+                <i data-lucide="alert-octagon" class="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5"></i>
+                <div>
+                  <strong>Pecah Ketuban Dini:</strong> Keluar cairan jernih berbau khas yang merembes atau membasahi pakaian sebelum usia 37 minggu.
+                </div>
+              </li>
+              <li class="flex items-start gap-2 bg-white/80 p-2 rounded-xl border border-red-200">
+                <i data-lucide="alert-octagon" class="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5"></i>
+                <div>
+                  <strong>Gerakan Janin Menghilang:</strong> Janin tidak bergerak sama sekali atau kurang dari 10 gerakan dalam 12 jam.
+                </div>
+              </li>
+              <li class="flex items-start gap-2 bg-white/80 p-2 rounded-xl border border-red-200">
+                <i data-lucide="alert-octagon" class="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5"></i>
+                <div>
+                  <strong>Kejang-kejang atau Demam Sangat Tinggi:</strong> Suhu tubuh >38.5°C disertai menggigil.
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- 2. YELLOW TIER (KONSULTASI BIDAN / DOKTER DALAM 24 JAM) -->
+          <div class="rounded-2xl border border-amber-300 bg-amber-50/70 p-4 shadow-sm">
+            <div class="flex items-center space-x-2.5 mb-2 text-amber-900">
+              <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+              <h3 class="text-sm font-bold text-amber-900">🟡 KUNING: PERIKSA KE BIDAN / KLINIK DALAM 24 JAM</h3>
+            </div>
+            <ul class="text-xs text-slate-800 space-y-2 list-none">
+              <li class="flex items-start gap-2 bg-white/80 p-2 rounded-xl border border-amber-200">
+                <i data-lucide="alert-circle" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
+                <div><strong>Mual-muntah berlebihan (Hiperemesis):</strong> Tidak bisa menelan makanan atau cairan seharian hingga lemas & bibir kering.</div>
+              </li>
+              <li class="flex items-start gap-2 bg-white/80 p-2 rounded-xl border border-amber-200">
+                <i data-lucide="alert-circle" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
+                <div><strong>Bengkak mendadak pada wajah dan kedua tangan:</strong> Bukan sekadar bengkak ringan di telapak kaki setelah berdiri lama.</div>
+              </li>
+              <li class="flex items-start gap-2 bg-white/80 p-2 rounded-xl border border-amber-200">
+                <i data-lucide="alert-circle" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
+                <div><strong>Nyeri atau rasa panas terbakar saat buang air kecil:</strong> Tanda infeksi saluran kemih (ISK) yang harus segera diobati.</div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- 3. GREEN TIER (KETIDAKNYAMANAN FISIOLOGIS WAJAR) -->
+          <div class="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 shadow-sm">
+            <div class="flex items-center space-x-2.5 mb-2 text-emerald-900">
+              <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+              <h3 class="text-sm font-bold text-emerald-900">🟢 HIJAU: KETIDAKNYAMANAN NORMAL & WAJAR</h3>
+            </div>
+            <p class="text-xs text-emerald-800 mb-2">Tubuh Bunda sedang beradaptasi memberi ruang bagi si kecil:</p>
+            <ul class="text-xs text-slate-700 space-y-1.5 list-disc list-inside">
+              <li><strong>Kram ligamen rahim:</strong> Rasa nyeri tajam sesaat di perut bawah saat berbalik posisi atau batuk.</li>
+              <li><strong>Sering buang air kecil:</strong> Wajar karena rahim membesar dan menekan kandung kemih.</li>
+              <li><strong>Kontraksi palsu (Braxton Hicks):</strong> Perut kencang tidak teratur, tidak bertambah sakit, dan hilang saat Bunda beristirahat atau minum air.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 6: PERSIAPAN PERSALINAN & P4K ================= -->
+      <section id="tab-prep" class="space-y-4 hidden animate-fade">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900" id="prep-page-title">Persiapan Persalinan & Tas Bersalin</h2>
+            <p class="text-xs text-slate-500" id="prep-page-sub">Dokumen KIA/BPJS, tas rumah sakit, & rencana P4K</p>
+          </div>
+          <button onclick="openAddChecklistItemModal()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold transition shadow-sm">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>Tambah Item</span>
+          </button>
+        </div>
+
+        <!-- Readiness Progress Card -->
+        <div class="rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-4 shadow-soft">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-semibold text-emerald-100">Kesiapan Menuju Hari-H Persalinan</span>
+            <span class="text-xs font-bold bg-white/20 px-2.5 py-0.5 rounded-full" id="prep-readiness-percent">82% Siap</span>
+          </div>
+          <div class="w-full bg-white/30 h-2.5 rounded-full overflow-hidden">
+            <div id="prep-progress-bar" class="bg-white h-full rounded-full transition-all duration-500" style="width: 82%;"></div>
+          </div>
+          <p class="text-[11px] text-emerald-100 mt-2 flex items-center gap-1">
+            <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+            <span id="prep-items-count-text">23 dari 28 perlengkapan telah siap di dalam tas.</span>
+          </p>
+        </div>
+
+        <!-- Category Sub-Tabs -->
+        <div class="flex space-x-1.5 overflow-x-auto hide-scrollbar pb-1 text-xs">
+          <button onclick="setPrepCategory('docs')" id="prep-cat-docs" class="px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 bg-rose-500 text-white shadow-sm flex-shrink-0">
+            <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
+            <span>Dokumen (KIA/BPJS)</span>
+          </button>
+          <button onclick="setPrepCategory('mom')" id="prep-cat-mom" class="px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 flex-shrink-0">
+            <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+            <span>Tas Ibu</span>
+          </button>
+          <button onclick="setPrepCategory('baby')" id="prep-cat-baby" class="px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 flex-shrink-0">
+            <i data-lucide="baby" class="w-3.5 h-3.5"></i>
+            <span>Tas Bayi</span>
+          </button>
+          <button onclick="setPrepCategory('p4k')" id="prep-cat-p4k" class="px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 flex-shrink-0">
+            <i data-lucide="car" class="w-3.5 h-3.5"></i>
+            <span>Rencana P4K</span>
+          </button>
+        </div>
+
+        <!-- Checklist List Item Area -->
+        <div id="prep-items-list" class="space-y-2">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FIXED MOBILE BOTTOM NAVIGATION BAR -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-rose-100 py-1.5 px-2 flex justify-around items-center max-w-md md:max-w-xl lg:max-w-2xl mx-auto shadow-lg">
+      <button onclick="switchTab('home')" id="nav-btn-home" class="flex flex-col items-center py-1 px-2 rounded-xl text-rose-600 font-bold transition">
+        <i data-lucide="home" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[10px]" id="nav-text-home">Beranda</span>
+      </button>
+
+      <button onclick="switchTab('schedule')" id="nav-btn-schedule" class="flex flex-col items-center py-1 px-2 rounded-xl text-slate-400 hover:text-slate-600 font-medium transition">
+        <i data-lucide="calendar" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[10px]" id="nav-text-schedule">Jadwal ANC</span>
+      </button>
+
+      <button onclick="switchTab('supplements')" id="nav-btn-supplements" class="flex flex-col items-center py-1 px-2 rounded-xl text-slate-400 hover:text-slate-600 font-medium transition">
+        <i data-lucide="pill" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[10px]" id="nav-text-supp">Suplemen</span>
+      </button>
+
+      <button onclick="switchTab('journal')" id="nav-btn-journal" class="flex flex-col items-center py-1 px-2 rounded-xl text-slate-400 hover:text-slate-600 font-medium transition">
+        <i data-lucide="activity" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[10px]" id="nav-text-journal">Jurnal</span>
+      </button>
+
+      <button onclick="switchTab('warning')" id="nav-btn-warning" class="flex flex-col items-center py-1 px-2 rounded-xl text-slate-400 hover:text-slate-600 font-medium transition">
+        <i data-lucide="alert-triangle" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[10px]" id="nav-text-warning">SOS Bahaya</span>
+      </button>
+
+      <button onclick="switchTab('prep')" id="nav-btn-prep" class="flex flex-col items-center py-1 px-2 rounded-xl text-slate-400 hover:text-slate-600 font-medium transition">
+        <i data-lucide="clipboard-check" class="w-5 h-5 mb-0.5"></i>
+        <span class="text-[10px]" id="nav-text-prep">Persiapan</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- ================= MODALS & OVERLAYS ================= -->
+
+  <!-- MODAL 1: 10-KICK COUNTER STOPWATCH & LOGGER -->
+  <div id="kick-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-5 shadow-2xl text-center space-y-4 animate-scale-up border border-rose-100">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-1.5 text-xs font-bold text-rose-600">
+          <i data-lucide="heart" class="w-4 h-4 fill-rose-500"></i>
+          <span>Metode Cardiff (10 Tendangan)</span>
+        </div>
+        <button onclick="closeKickModal()" class="p-1 rounded-full text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="bg-rose-50/80 rounded-2xl p-4 border border-rose-100">
+        <span class="text-xs text-slate-500 font-medium">Waktu Sesi Berjalan</span>
+        <div class="text-3xl font-extrabold text-slate-900 font-mono my-1" id="kick-stopwatch">00:00</div>
+        <p class="text-[11px] text-slate-500">Target: Capai 10 gerakan dalam waktu maksimal 2 jam.</p>
+      </div>
+
+      <!-- Kick Counter Big Visual Circle -->
+      <div class="py-2 flex flex-col items-center">
+        <button onclick="registerKick()" id="kick-record-btn" class="w-28 h-28 rounded-full bg-gradient-to-tr from-rose-500 to-pink-400 hover:from-rose-600 hover:to-pink-500 text-white flex flex-col items-center justify-center shadow-float active:scale-95 transition">
+          <i data-lucide="footprints" class="w-8 h-8 mb-1"></i>
+          <span class="text-xs font-extrabold uppercase">Tendang!</span>
+        </button>
+        <div class="mt-3 text-sm font-bold text-slate-800">
+          Gerakan Tercatat: <span id="current-kick-count" class="text-rose-600 text-lg">0</span> / 10
+        </div>
+      </div>
+
+      <!-- Kick Dots Indicator -->
+      <div class="flex justify-center gap-1.5" id="kick-dots-container">
+        <!-- 10 dots rendered via JS -->
+      </div>
+
+      <div class="pt-2 flex gap-2">
+        <button onclick="resetKickSession()" class="flex-1 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700 bg-slate-100 rounded-xl">
+          Reset Sesi
+        </button>
+        <button onclick="finishKickSession()" class="flex-1 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm">
+          Simpan Sesi
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: CATAT TENSI & BERAT BADAN (VITALS MODAL) -->
+  <div id="vitals-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-5 shadow-2xl space-y-4 border border-rose-100">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+          <i data-lucide="heart-pulse" class="w-4 h-4 text-rose-500"></i>
+          <span>Catat Pemeriksaan Harian</span>
+        </h3>
+        <button onclick="closeVitalsModal()" class="p-1 rounded-full text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="vitals-form" onsubmit="saveVitals(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Tanggal & Waktu Catatan</label>
+          <input type="datetime-local" id="input-vital-date" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-400">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Tensi Sistolik</label>
+            <div class="relative">
+              <input type="number" id="input-vital-sys" placeholder="115" min="70" max="240" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-400">
+              <span class="absolute right-2.5 top-2 text-[10px] text-slate-400">mmHg</span>
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Tensi Diastolik</label>
+            <div class="relative">
+              <input type="number" id="input-vital-dia" placeholder="75" min="40" max="150" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-400">
+              <span class="absolute right-2.5 top-2 text-[10px] text-slate-400">mmHg</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-time BP Assessment Hint -->
+        <div id="bp-realtime-hint" class="p-2 rounded-xl bg-slate-50 text-[11px] text-slate-500 border border-slate-100">
+          Masukkan nilai tensi untuk evaluasi otomatis batas preeklampsia.
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Berat Badan Ibu (kg)</label>
+          <input type="number" step="0.1" id="input-vital-weight" placeholder="58.5" min="35" max="150" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-400">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Keluhan / Gejala yang Dirasakan</label>
+          <div class="flex flex-wrap gap-1.5" id="symptoms-chips">
+            <button type="button" onclick="toggleSymptomChip(this)" class="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-600 text-[11px] hover:border-rose-400">Mual / Pusing</button>
+            <button type="button" onclick="toggleSymptomChip(this)" class="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-600 text-[11px] hover:border-rose-400">Nyeri Punggung</button>
+            <button type="button" onclick="toggleSymptomChip(this)" class="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-600 text-[11px] hover:border-rose-400">Kaki Sedikit Bengkak</button>
+            <button type="button" onclick="toggleSymptomChip(this)" class="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-600 text-[11px] hover:border-rose-400">Gerakan Janin Aktif</button>
+            <button type="button" onclick="toggleSymptomChip(this)" class="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-600 text-[11px] hover:border-rose-400">Merasa Sehat & Bugar</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Catatan Tambahan untuk Bidan</label>
+          <textarea id="input-vital-notes" rows="2" placeholder="Contoh: Tidur cukup, minum air 2.5 liter, sedikit kram saat sore..." class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-400"></textarea>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition shadow-sm mt-2">
+          Simpan ke Jurnal Medis
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: TAMBAH / EDIT KUNJUNGAN ANC -->
+  <div id="visit-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-5 shadow-2xl space-y-4 border border-rose-100">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+          <i data-lucide="calendar-plus" class="w-4 h-4 text-rose-500"></i>
+          <span>Jadwalkan Kunjungan ANC</span>
+        </h3>
+        <button onclick="closeVisitModal()" class="p-1 rounded-full text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="visit-form" onsubmit="saveCustomVisit(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Nama / Keperluan Pemeriksaan</label>
+          <input type="text" id="input-visit-title" placeholder="Contoh: USG Trimester 3 & Cek Hb Lab" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-400">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Tanggal Kunjungan</label>
+          <input type="date" id="input-visit-date" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-400">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Tenaga Kesehatan & Fasilitas</label>
+          <input type="text" id="input-visit-provider" placeholder="Contoh: Bidan Siti Aminah, S.Tr.Keb • Puskesmas Sehat" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-400">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Catatan Persiapan</label>
+          <input type="text" id="input-visit-notes" placeholder="Bawa buku KIA, fotokopi KTP & BPJS" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-400">
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition shadow-sm mt-2">
+          Simpan Jadwal Pemeriksaan
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: TAMBAH SUPLEMEN KUSTOM -->
+  <div id="supp-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-5 shadow-2xl space-y-4 border border-rose-100">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+          <i data-lucide="pill" class="w-4 h-4 text-rose-500"></i>
+          <span>Tambah Suplemen / Obat</span>
+        </h3>
+        <button onclick="closeSuppModal()" class="p-1 rounded-full text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="supp-form" onsubmit="saveCustomSupplement(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Nama Suplemen / Obat</label>
+          <input type="text" id="input-supp-name" placeholder="Contoh: Kalsium Laktat 500mg" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-400">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Dosis / Keterangan</label>
+          <input type="text" id="input-supp-dosage" placeholder="Contoh: 1 tablet setelah sarapan" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-400">
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Waktu Alarm Pengingat</label>
+          <input type="time" id="input-supp-time" value="08:00" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-400">
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition shadow-sm mt-2">
+          Tambahkan ke Daftar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 5: TAMBAH ITEM CHECKLIST PERSIAPAN LAHIR -->
+  <div id="checklist-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-5 shadow-2xl space-y-4 border border-rose-100">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+          <i data-lucide="clipboard-list" class="w-4 h-4 text-rose-500"></i>
+          <span>Tambah Perlengkapan Bersalin</span>
+        </h3>
+        <button onclick="closeChecklistModal()" class="p-1 rounded-full text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="checklist-form" onsubmit="saveCustomChecklistItem(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Kategori Perlengkapan</label>
+          <select id="input-check-cat" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-400">
+            <option value="docs">Dokumen Penting (KIA/BPJS/KTP)</option>
+            <option value="mom">Tas Bersalin Ibu</option>
+            <option value="baby">Tas Perlengkapan Bayi</option>
+            <option value="p4k">Logistik P4K / Rencana Persalinan</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Nama Perlengkapan</label>
+          <input type="text" id="input-check-name" placeholder="Contoh: Pompa ASI Elektrik & Kantong ASI" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-400">
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition shadow-sm mt-2">
+          Tambahkan ke Checklist
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 6: PENGATURAN PROFIL & ESTIMATED DUE DATE (EDD CALCULATOR) -->
+  <div id="settings-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-sm p-5 shadow-2xl space-y-4 border border-rose-100 max-h-[90vh] overflow-y-auto hide-scrollbar">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+          <i data-lucide="user-cog" class="w-4 h-4 text-rose-500"></i>
+          <span>Profil Kehamilan & Kontak SOS</span>
+        </h3>
+        <button onclick="closeSettingsModal()" class="p-1 rounded-full text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="settings-form" onsubmit="saveUserProfile(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Nama Lengkap Bunda</label>
+          <input type="text" id="input-profile-name" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-400">
+        </div>
+
+        <div class="p-3 bg-rose-50 rounded-2xl border border-rose-100 space-y-2">
+          <span class="text-[11px] font-bold text-rose-800">Kalkulator HPL (Naegele)</span>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Hari Pertama Haid Terakhir (HPHT / LMP)</label>
+            <input type="date" id="input-profile-lmp" onchange="calculateEddFromLmp()" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-rose-400">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Taksiran Persalinan (HPL / EDD)</label>
+            <input type="date" id="input-profile-edd" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-rose-400">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-1">Berat Badan Sebelum Hamil (kg)</label>
+            <input type="number" step="0.1" id="input-profile-preweight" class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-rose-400">
+          </div>
+        </div>
+
+        <!-- Emergency Contacts Section -->
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
+          <span class="text-[11px] font-bold text-slate-700">Kontak Siaga Gawat Darurat (SOS)</span>
+          <div>
+            <label class="block text-[10px] text-slate-500">Nama & No. WhatsApp Suami/Pasangan</label>
+            <div class="grid grid-cols-2 gap-1.5 mt-0.5">
+              <input type="text" id="input-partner-name" placeholder="Ayah Dimas" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white">
+              <input type="text" id="input-partner-phone" placeholder="6281234567890" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white">
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-500">Nama & No. WhatsApp Bidan / dr. SpOG</label>
+            <div class="grid grid-cols-2 gap-1.5 mt-0.5">
+              <input type="text" id="input-midwife-name" placeholder="Bidan Siti Aminah" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white">
+              <input type="text" id="input-midwife-phone" placeholder="6281987654321" class="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white">
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-500">Fasilitas / RS Rujukan 24 Jam</label>
+            <input type="text" id="input-hospital-name" placeholder="RSUD Sehat PONEK 24 Jam" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white mt-0.5">
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition shadow-sm mt-2">
+          Simpan Pembaruan Profil
+        </button>
+      </form>
+
+      <!-- Demo Data & Backup Tools -->
+      <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+        <button onclick="loadSampleDemoData()" class="text-rose-600 hover:underline font-bold flex items-center gap-1">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          Muat Data Contoh (Demo)
+        </button>
+        <button onclick="exportDataBackup()" class="text-slate-600 hover:underline flex items-center gap-1">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          Backup JSON
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 7: MIDWIFE PRINT REPORT (Buku KIA Summary Layout) -->
+  <div id="midwife-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-lg p-5 shadow-2xl space-y-4 border border-rose-100 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between no-print">
+        <div>
+          <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+            <i data-lucide="file-text" class="w-4 h-4 text-rose-500"></i>
+            <span>Ringkasan Medis untuk Bidan / Dokter (Buku KIA)</span>
+          </h3>
+          <p class="text-[11px] text-slate-400">Siap dicetak atau disimpan sebagai PDF</p>
+        </div>
+        <button onclick="closeMidwifeReportModal()" class="p-1 rounded-full text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- PRINTABLE SHEET CONTAINER -->
+      <div id="printable-midwife-report" class="bg-white p-4 rounded-xl border border-slate-200 space-y-4 text-slate-800">
+        <!-- Header format Buku KIA -->
+        <div class="border-b-2 border-slate-800 pb-3 flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-extrabold uppercase tracking-wide text-slate-900">LEMBAR PEMANTAUAN KESEHATAN IBU HAMIL</h2>
+            <p class="text-[10px] text-slate-600">Standar Buku Kesehatan Ibu & Anak (KIA) • Kemenkes RI</p>
+          </div>
+          <div class="text-right text-[10px] text-slate-500">
+            Dicetak: <span id="report-print-date">11 Nov 2026</span><br>
+            Aplikasi: <strong>Mother's Care</strong>
+          </div>
+        </div>
+
+        <!-- Mother's Bio Table -->
+        <div class="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-3 rounded-lg border border-slate-200">
+          <div>
+            <span class="text-slate-500">Nama Ibu:</span> <strong id="rep-mom-name">Anisa Rahma</strong><br>
+            <span class="text-slate-500">HPHT:</span> <span id="rep-lmp">15 Okt 2026</span><br>
+            <span class="text-slate-500">Taksiran Persalinan (HPL):</span> <strong id="rep-edd">22 Jul 2027</strong>
+          </div>
+          <div>
+            <span class="text-slate-500">Usia Kehamilan Saat Ini:</span> <strong id="rep-ga">24 Minggu 3 Hari</strong><br>
+            <span class="text-slate-500">BB Sebelum Hamil:</span> <span id="rep-preweight">52.0 kg</span><br>
+            <span class="text-slate-500">Bidan Penanggung Jawab:</span> <span id="rep-midwife">Bidan Siti Aminah</span>
+          </div>
+        </div>
+
+        <!-- Vitals History Table in Report -->
+        <div class="space-y-1.5">
+          <h4 class="text-xs font-bold uppercase text-slate-800 border-b border-slate-200 pb-1">5 Catatan Tensi & Berat Badan Terakhir</h4>
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-slate-100 text-slate-700 text-[11px]">
+                <th class="p-1.5 border border-slate-200">Tanggal</th>
+                <th class="p-1.5 border border-slate-200">Tensi (mmHg)</th>
+                <th class="p-1.5 border border-slate-200">BB (kg)</th>
+                <th class="p-1.5 border border-slate-200">Kenaikan</th>
+                <th class="p-1.5 border border-slate-200">Evaluasi Klinis</th>
+              </tr>
+            </thead>
+            <tbody id="rep-vitals-rows" class="text-[11px]">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Supplement Adherence Snapshot in Report -->
+        <div class="space-y-1.5">
+          <h4 class="text-xs font-bold uppercase text-slate-800 border-b border-slate-200 pb-1">Kepatuhan Suplemen Anemia & Nutrisi</h4>
+          <div class="text-xs text-slate-700 grid grid-cols-2 gap-2">
+            <div>
+              • Tablet Tambah Darah (TTD): <strong class="text-emerald-700" id="rep-ttd-compliance">Rutin (95% Kepatuhan)</strong><br>
+              • Asam Folat & Kalsium: <strong>Tercatat Teratur</strong>
+            </div>
+            <div>
+              • Total Tablet Fe Diminum: <strong id="rep-ttd-count">65 dari target 90 tablet</strong><br>
+              • Catatan Tendangan: <strong>Janin Aktif Normal (10 kicks &lt; 45 menit)</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 text-[10px] text-slate-400 italic text-center border-t border-slate-200">
+          Lembar ringkasan ini dapat dilampirkan bersama Buku KIA saat melakukan konsultasi di Puskesmas, Klinik Pratama, atau Rumah Sakit.
+        </div>
+      </div>
+
+      <div class="flex gap-2 no-print">
+        <button onclick="window.print()" class="flex-1 py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition shadow-sm flex items-center justify-center gap-1.5 text-xs">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>Cetak Sekarang / Simpan PDF</span>
+        </button>
+        <button onclick="closeMidwifeReportModal()" class="px-4 py-2.5 bg-slate-100 text-slate-600 font-semibold rounded-xl text-xs hover:bg-slate-200">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATION LOGIC & STATE CONTROLLER -->
+  <script>
+    // ==========================================
+    // 1. DATA STATE & LOCALSTORAGE PERSISTENCE
+    // ==========================================
+    const STORAGE_KEY = "mothers_care_data_v1";
+
+    const DEFAULT_DATA = {
+      lang: "id",
+      profile: {
+        name: "Bunda Anisa",
+        lmp: "2026-05-25", // HPHT
+        edd: "2027-03-01", // HPL
+        preWeight: 52.0,
+        partnerName: "Ayah Dimas",
+        partnerPhone: "6281234567890",
+        midwifeName: "Bidan Siti Aminah, S.Tr.Keb",
+        midwifePhone: "6281987654321",
+        hospitalName: "RSUD Sehat Siaga PONEK 24 Jam",
+      },
+      visits: [
+        {
+          id: "anc-1",
+          title: "Kunjungan 1 (Trimester 1): Skrining Awal Dokter",
+          week: "Minggu 8",
+          date: "2026-07-20",
+          provider: "dr. SpOG & Bidan Siti",
+          notes: "USG awal kantung kehamilan, tes lab Hb (12.2 g/dL), triple eliminasi Non-Reaktif.",
+          done: true
+        },
+        {
+          id: "anc-2",
+          title: "Kunjungan 2 (Trimester 1): Pemantauan LiLA & USG",
+          week: "Minggu 12",
+          date: "2026-08-18",
+          provider: "dr. SpOG • RS Sehat",
+          notes: "Detak jantung janin aktif, nuchal translucency normal, LiLA 24.5 cm (Gizi baik).",
+          done: true
+        },
+        {
+          id: "anc-3",
+          title: "Kunjungan 3 (Trimester 2): Skrining Organ & Imunisasi TT",
+          week: "Minggu 20",
+          date: "2026-10-15",
+          provider: "Bidan Siti Aminah • Puskesmas",
+          notes: "Imunisasi Tetanus Toxoid (TT2) diberikan, DJJ 142 bpm, janin aktif.",
+          done: true
+        },
+        {
+          id: "anc-4",
+          title: "Kunjungan 4 (Trimester 3): Tensi & Skrining Preeklampsia",
+          week: "Minggu 28",
+          date: "2026-12-10",
+          provider: "dr. SpOG & Bidan Siti",
+          notes: "Cek lab proteinuria ulang, tensi berkala, evaluasi posisi plasenta.",
+          done: false
+        },
+        {
+          id: "anc-5",
+          title: "Kunjungan 5 (Trimester 3): Penilaian Posisi Kepala Janin",
+          week: "Minggu 34",
+          date: "2027-01-20",
+          provider: "Bidan Siti Aminah • Klinik",
+          notes: "Perencanaan P4K, pengecekan posisi kepala sudah masuk panggul atau belum.",
+          done: false
+        },
+        {
+          id: "anc-6",
+          title: "Kunjungan 6 (Trimester 3): Evaluasi Akhir Persalinan",
+          week: "Minggu 38",
+          date: "2027-02-16",
+          provider: "dr. SpOG • RS Rujukan",
+          notes: "Kesiapan panggul, kardiotokografi (CTG), persetujuan rencana persalinan.",
+          done: false
+        }
+      ],
+      supplements: [
+        {
+          id: "sup-1",
+          name: "Tablet Tambah Darah (TTD)",
+          dosage: "1 tablet (60mg Fe + 400mcg Asam Folat)",
+          time: "20:00",
+          takenToday: true,
+          tip: "Minum malam hari dengan air putih / jus buah untuk mengurangi rasa mual."
+        },
+        {
+          id: "sup-2",
+          name: "Kalsium Laktat (Calcium)",
+          dosage: "1 tablet 500mg setelah sarapan",
+          time: "08:30",
+          takenToday: true,
+          tip: "Penting untuk pembentukan tulang & gigi si kecil serta cegah kram ibu."
+        },
+        {
+          id: "sup-3",
+          name: "Minyak Ikan DHA & Omega-3",
+          dosage: "1 kapsul lunak siang hari",
+          time: "13:00",
+          takenToday: false,
+          tip: "Nutrisi esensial untuk perkembangan jaringan otak dan retina mata janin."
+        }
+      ],
+      vitals: [
+        {
+          id: "vit-1",
+          date: "2026-11-10 08:30",
+          sys: 115,
+          dia: 75,
+          weight: 58.4,
+          symptoms: ["Gerakan Janin Aktif", "Merasa Sehat & Bugar"],
+          notes: "Tidur 8 jam, makan teratur."
+        },
+        {
+          id: "vit-2",
+          date: "2026-11-03 09:00",
+          sys: 118,
+          dia: 76,
+          weight: 57.8,
+          symptoms: ["Nyeri Punggung"],
+          notes: "Punggung pegal setelah duduk lama."
+        },
+        {
+          id: "vit-3",
+          date: "2026-10-26 08:45",
+          sys: 112,
+          dia: 74,
+          weight: 57.1,
+          symptoms: ["Kaki Sedikit Bengkak"],
+          notes: "Kaki membaik setelah diganjal bantal."
+        },
+        {
+          id: "vit-4",
+          date: "2026-10-19 09:15",
+          sys: 116,
+          dia: 75,
+          weight: 56.4,
+          symptoms: ["Merasa Sehat & Bugar"],
+          notes: "Nafsu makan membaik."
+        },
+        {
+          id: "vit-5",
+          date: "2026-10-12 08:30",
+          sys: 110,
+          dia: 72,
+          weight: 55.6,
+          symptoms: ["Mual / Pusing"],
+          notes: "Pusing ringan pagi hari."
+        }
+      ],
+      checklist: [
+        // Category: docs
+        { id: "c-1", cat: "docs", name: "Buku KIA (Buku Pink Ibu & Anak)", checked: true },
+        { id: "c-2", cat: "docs", name: "KTP Asli & Fotokopi (Ibu & Suami)", checked: true },
+        { id: "c-3", cat: "docs", name: "Kartu Keluarga (KK) Asli & Fotokopi", checked: true },
+        { id: "c-4", cat: "docs", name: "Kartu BPJS Kesehatan Aktif / Asuransi", checked: true },
+        { id: "c-5", cat: "docs", name: "Surat Rujukan Faskes 1 (Puskesmas/Klinik)", checked: true },
+        { id: "c-6", cat: "docs", name: "Hasil Pemeriksaan USG & Hasil Laboratorium", checked: false },
+
+        // Category: mom
+        { id: "c-7", cat: "mom", name: "Baju tidur kancing depan (ramah menyusui) - 3 stel", checked: true },
+        { id: "c-8", cat: "mom", name: "Kain batik panjang / sarung bersalin - 3 helai", checked: true },
+        { id: "c-9", cat: "mom", name: "Pembalut nifas (maternity pads) jumbo - 2 pack", checked: true },
+        { id: "c-10", cat: "mom", name: "Celana dalam katun longgar / disposable - 6 pcs", checked: true },
+        { id: "c-11", cat: "mom", name: "Bra menyusui & Breast pad penyerap ASI", checked: true },
+        { id: "c-12", cat: "mom", name: "Perlengkapan mandi & handuk lembut", checked: true },
+        { id: "c-13", cat: "mom", name: "Sandal kamar yang nyaman & tidak licin", checked: true },
+        { id: "c-14", cat: "mom", name: "Pompa ASI (Breast pump) & botol steril", checked: false },
+
+        // Category: baby
+        { id: "c-15", cat: "baby", name: "Baju & celana bayi newborn - 4 stel", checked: true },
+        { id: "c-16", cat: "baby", name: "Kain bedong katun lembut - 4 helai", checked: true },
+        { id: "c-17", cat: "baby", name: "Popok newborn (kain / sekali pakai perekat)", checked: true },
+        { id: "c-18", cat: "baby", name: "Sarung tangan & kaos kaki bayi - 3 pasang", checked: true },
+        { id: "c-19", cat: "baby", name: "Topi bayi & selimut bertopi untuk pulang", checked: true },
+        { id: "c-20", cat: "baby", name: "Minyak telon, kapas steril, & tisu basah non-alkohol", checked: true },
+        { id: "c-21", cat: "baby", name: "Gendongan bayi untuk perjalanan pulang", checked: false },
+
+        // Category: p4k
+        { id: "c-22", cat: "p4k", name: "Penolong persalinan terpilih (Bidan / dr. SpOG)", checked: true },
+        { id: "c-23", cat: "p4k", name: "Tempat persalinan terencana (RSUD PONEK / Puskesmas)", checked: true },
+        { id: "c-24", cat: "p4k", name: "Kendaraan / Mobil siaga persalinan tersedia", checked: true },
+        { id: "c-25", cat: "p4k", name: "Calon 2 orang pendonor darah golongan cocok", checked: false },
+        { id: "c-26", cat: "p4k", name: "Pendamping persalinan (Suami siaga)", checked: true },
+        { id: "c-27", cat: "p4k", name: "Tabungan persalinan / Jaminan BPJS", checked: true }
+      ],
+      kickHistory: {
+        lastDurationMinutes: 28,
+        lastDate: "2026-11-10 19:40",
+        count: 10
+      }
+    };
+
+    let appData = loadState();
+    let currentPrepCategory = 'docs';
+    let kickTimer = null;
+    let kickSeconds = 0;
+    let kickSessionCount = 0;
+    let bpChartInstance = null;
+    let weightChartInstance = null;
+
+    function loadState() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          return JSON.parse(stored);
+        }
+      } catch (e) {
+        console.error("Error loading localStorage", e);
+      }
+      return JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+      } catch (e) {
+        console.error("Error saving state", e);
+      }
+    }
+
+    // ==========================================
+    // 2. AUDIO SYNTHESIS FEEDBACK (Web Audio API)
+    // ==========================================
+    function playChime(type = 'success') {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'success') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+          osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+          gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.35);
+        } else if (type === 'kick') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.18);
+        }
+      } catch (err) {
+        // Silent fail if web audio blocked
+      }
+    }
+
+    // ==========================================
+    // 3. GESTATIONAL CALCULATIONS (Naegele Rule)
+    // ==========================================
+    const FRUIT_BENCHMARKS = [
+      { maxWeek: 4, name: "Biji Bunga Poppy", icon: "🌱", size: "~1 mm", desc: "Embrio mulai berkembang dan menempel kuat di dinding rahim Bunda." },
+      { maxWeek: 8, name: "Buah Raspberry", icon: "🍓", size: "~1.6 cm • 1 g", desc: "Jari tangan dan kaki kecil mulai terbentuk, detak jantung sudah berdegup kencang!" },
+      { maxWeek: 12, name: "Buah Jeruk Nipis", icon: "🍋", size: "~5.4 cm • 14 g", desc: "Refleks mulai aktif! Si kecil sudah bisa membuka dan menutup jari-jarinya." },
+      { maxWeek: 16, name: "Buah Alpukat", icon: "🥑", size: "~11.6 cm • 100 g", desc: "Mata bayi mulai peka terhadap cahaya luar, otot punggung semakin kuat." },
+      { maxWeek: 20, name: "Buah Pisang", icon: "🍌", size: "~25 cm • 300 g", desc: "Setengah jalan! Gerakan tendangan lembut (quickening) kini mulai terasa jelas." },
+      { maxWeek: 24, name: "Jagung Manis", icon: "🌽", size: "~30 cm • 600 g", desc: "Indra pendengaran si kecil semakin peka! Bayi dapat mendengar suara obrolan Bunda & Ayah." },
+      { maxWeek: 28, name: "Terong Ungu", icon: "🍆", size: "~37 cm • 1 kg", desc: "Kelopak mata mulai terbuka dan berkedip. Paru-paru terus menyempurnakan fungsinya." },
+      { maxWeek: 32, name: "Kelapa Segar", icon: "🥥", size: "~42 cm • 1.7 kg", desc: "Lapisan lemak di bawah kulit semakin tebal, kuku jari tangan sudah tumbuh sempurna." },
+      { maxWeek: 36, name: "Pepaya Manis", icon: "🍈", size: "~47 cm • 2.6 kg", desc: "Posisi kepala bayi bersiap turun menuju jalan lahir. Tetap tenang dan santai." },
+      { maxWeek: 42, name: "Semangka Matang", icon: "🍉", size: "~50 cm • 3.3 kg", desc: "Si kecil siap menyapa dunia! Kesiapan mental dan perlengkapan persalinan telah siap." }
+    ];
+
+    function calculateGestationalStats() {
+      const today = new Date();
+      let eddDate = new Date(appData.profile.edd);
+      let lmpDate = appData.profile.lmp ? new Date(appData.profile.lmp) : null;
+
+      // If LMP exists, calculate from LMP
+      let diffDays = 0;
+      if (lmpDate && !isNaN(lmpDate.getTime())) {
+        const timeDiff = today.getTime() - lmpDate.getTime();
+        diffDays = Math.floor(timeDiff / (1000 * 3600 * 24));
+      } else if (eddDate && !isNaN(eddDate.getTime())) {
+        // Fallback: 280 days total pregnancy
+        const remainingToEdd = Math.floor((eddDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+        diffDays = 280 - remainingToEdd;
+      }
+
+      if (diffDays < 0) diffDays = 7; // minimum baseline
+      const weeks = Math.floor(diffDays / 7);
+      const days = diffDays % 7;
+
+      // Trimester
+      let trimester = 1;
+      let trimesterName = "Trimester 1";
+      if (weeks >= 28) {
+        trimester = 3;
+        trimesterName = "Trimester 3";
+      } else if (weeks >= 13) {
+        trimester = 2;
+        trimesterName = "Trimester 2";
+      }
+
+      // Days remaining to EDD
+      const daysRemaining = Math.max(0, Math.floor((eddDate.getTime() - today.getTime()) / (1000 * 3600 * 24)));
+
+      // Fruit benchmark
+      const benchmark = FRUIT_BENCHMARKS.find(b => weeks <= b.maxWeek) || FRUIT_BENCHMARKS[FRUIT_BENCHMARKS.length - 1];
+
+      return { weeks, days, trimester, trimesterName, daysRemaining, benchmark, eddDate };
+    }
+
+    function calculateEddFromLmp() {
+      const lmpVal = document.getElementById('input-profile-lmp').value;
+      if (!lmpVal) return;
+      const lmp = new Date(lmpVal);
+      // Naegele's rule: +1 year, -3 months, +7 days (or simply +280 days)
+      const edd = new Date(lmp);
+      edd.setDate(edd.getDate() + 280);
+      const formatted = edd.toISOString().split('T')[0];
+      document.getElementById('input-profile-edd').value = formatted;
+    }
+
+    // ==========================================
+    // 4. UI RENDER ENGINE
+    // ==========================================
+    function renderAll() {
+      renderHeader();
+      renderHome();
+      renderANC();
+      renderSupplements();
+      renderJournal();
+      renderPrep();
+      renderEmergencyDial();
+      checkVitalsAlert();
+      lucide.createIcons();
+    }
+
+    function renderHeader() {
+      document.getElementById('header-mom-name').textContent = appData.profile.name || "Bunda";
+      document.getElementById('lang-code').textContent = appData.lang.toUpperCase();
+      document.getElementById('lang-flag').textContent = appData.lang === 'id' ? '🇮🇩' : '🇬🇧';
+    }
+
+    function renderHome() {
+      const stats = calculateGestationalStats();
+
+      document.getElementById('hero-weeks').textContent = stats.weeks;
+      document.getElementById('hero-days').textContent = stats.days;
+      document.getElementById('gestational-trimester-badge').textContent = stats.trimesterName;
+      
+      const options = { day: 'numeric', month: 'long', year: 'numeric' };
+      document.getElementById('hero-edd-date').textContent = stats.eddDate.toLocaleDateString('id-ID', options);
+      document.getElementById('hero-countdown-text').textContent = `Tersisa ${stats.daysRemaining} hari lagi menuju hari persalinan`;
+
+      // Baby benchmark
+      document.getElementById('hero-fruit-icon').textContent = stats.benchmark.icon;
+      document.getElementById('hero-fruit-name').textContent = `Sebesar ${stats.benchmark.name}`;
+      document.getElementById('hero-baby-length').textContent = stats.benchmark.size;
+      document.getElementById('hero-fruit-desc').textContent = stats.benchmark.desc;
+
+      // Next Visit Banner calculation
+      const upcoming = appData.visits.find(v => !v.done);
+      const nextCard = document.getElementById('next-visit-card');
+      if (upcoming) {
+        nextCard.classList.remove('hidden');
+        document.getElementById('next-visit-title').textContent = upcoming.title;
+        document.getElementById('next-visit-provider').textContent = upcoming.provider;
+        const vDate = new Date(upcoming.date);
+        const daysDiff = Math.ceil((vDate.getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+        let daysStr = daysDiff > 0 ? `⏳ ${daysDiff} Hari Lagi (${vDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })})` : `Hari ini (${vDate.toLocaleDateString('id-ID')})`;
+        document.getElementById('next-visit-countdown').textContent = daysStr;
+      } else {
+        document.getElementById('next-visit-title').textContent = "Semua Kunjungan Terjadwal Telah Selesai!";
+        document.getElementById('next-visit-countdown').textContent = "Siap Menuju Hari Persalinan 🎉";
+      }
+
+      // Today's Supplements on Home
+      const pillsContainer = document.getElementById('home-pills-list');
+      pillsContainer.innerHTML = appData.supplements.map(sup => `
+        <div class="flex items-center justify-between p-2.5 rounded-xl border ${sup.takenToday ? 'bg-emerald-50/60 border-emerald-200' : 'bg-slate-50 border-slate-100'} transition">
+          <div class="flex items-center space-x-2.5">
+            <button onclick="toggleSupplementToday('${sup.id}')" class="w-6 h-6 rounded-lg flex items-center justify-center transition ${sup.takenToday ? 'bg-emerald-500 text-white' : 'border-2 border-slate-300 text-transparent hover:border-rose-400'}">
+              <i data-lucide="check" class="w-3.5 h-3.5 ${sup.takenToday ? 'stroke-[3]' : ''}"></i>
+            </button>
+            <div>
+              <h4 class="text-xs font-bold ${sup.takenToday ? 'line-through text-slate-400' : 'text-slate-800'}">${sup.name}</h4>
+              <p class="text-[10px] text-slate-400">${sup.dosage} • ${sup.time}</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${sup.takenToday ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'}">
+            ${sup.takenToday ? 'Sudah Minum' : 'Belum'}
+          </span>
+        </div>
+      `).join('');
+
+      // Home Vitals Snapshot
+      if (appData.vitals.length > 0) {
+        const latest = appData.vitals[0];
+        document.getElementById('home-latest-bp').textContent = `${latest.sys}/${latest.dia}`;
+        document.getElementById('home-latest-weight').textContent = latest.weight.toFixed(1);
+
+        const gain = (latest.weight - (appData.profile.preWeight || 52)).toFixed(1);
+        document.getElementById('home-weight-gain-text').textContent = `Kenaikan: +${gain} kg dari awal (${appData.profile.preWeight || 52} kg)`;
+
+        const badge = document.getElementById('home-bp-status-badge');
+        if (latest.sys >= 140 || latest.dia >= 90) {
+          badge.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-700 w-fit";
+          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Waspada Hipertensi`;
+        } else if (latest.sys >= 120 || latest.dia >= 80) {
+          badge.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 w-fit";
+          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Pra-Hipertensi`;
+        } else {
+          badge.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700 w-fit";
+          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Normal Sehat`;
+        }
+      }
+    }
+
+    function renderANC() {
+      const container = document.getElementById('anc-timeline-container');
+      const completedCount = appData.visits.filter(v => v.done).length;
+      const totalCount = appData.visits.length;
+      document.getElementById('anc-completion-text').textContent = `${completedCount} dari ${totalCount} Selesai`;
+      document.getElementById('anc-progress-bar').style.width = `${Math.round((completedCount / totalCount) * 100)}%`;
+
+      container.innerHTML = appData.visits.map((visit, index) => {
+        const isDone = visit.done;
+        return `
+          <div class="relative pl-6 pb-2">
+            <!-- Node Marker -->
+            <div class="absolute -left-[9px] top-1 w-5 h-5 rounded-full border-2 flex items-center justify-center ${isDone ? 'bg-emerald-500 border-white text-white shadow-sm' : 'bg-white border-slate-300 text-slate-300'}">
+              <i data-lucide="${isDone ? 'check' : 'circle'}" class="w-3 h-3 ${isDone ? 'stroke-[3]' : ''}"></i>
+            </div>
+
+            <!-- Card Body -->
+            <div class="rounded-2xl p-3.5 border ${isDone ? 'bg-emerald-50/40 border-emerald-100' : 'bg-white border-slate-100 shadow-sm'} transition">
+              <div class="flex items-start justify-between">
+                <div>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'}">
+                    ${visit.week}
+                  </span>
+                  <h4 class="text-xs font-bold text-slate-900 mt-1">${visit.title}</h4>
+                  <p class="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1">
+                    <i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i>
+                    ${visit.date} • ${visit.provider}
+                  </p>
+                </div>
+                <button onclick="toggleVisitDone('${visit.id}')" class="px-2.5 py-1 rounded-xl text-[11px] font-bold transition ${isDone ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
+                  ${isDone ? '✓ Selesai' : 'Tandai Selesai'}
+                </button>
+              </div>
+
+              ${visit.notes ? `
+                <div class="mt-2 pt-2 border-t border-slate-100 text-[11px] text-slate-600 flex items-start gap-1">
+                  <i data-lucide="file-check" class="w-3.5 h-3.5 text-rose-500 flex-shrink-0 mt-0.5"></i>
+                  <span>${visit.notes}</span>
+                </div>
+              ` : ''}
+
+              <div class="mt-2 flex justify-end">
+                <button onclick="sendVisitWhatsAppReminder('${visit.id}')" class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded-lg border border-emerald-200 flex items-center gap-1">
+                  <i data-lucide="message-circle" class="w-3 h-3 text-emerald-600"></i>
+                  Kirim WA Pengingat
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderSupplements() {
+      const container = document.getElementById('supplements-full-list');
+      const takenCount = appData.supplements.filter(s => s.takenToday).length;
+      document.getElementById('supp-stat-today').textContent = `${takenCount}/${appData.supplements.length}`;
+
+      container.innerHTML = appData.supplements.map(sup => `
+        <div class="rounded-2xl p-4 border ${sup.takenToday ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-100 shadow-card'} transition">
+          <div class="flex items-start justify-between">
+            <div class="flex items-start space-x-3">
+              <button onclick="toggleSupplementToday('${sup.id}')" class="w-8 h-8 rounded-xl flex items-center justify-center transition mt-0.5 ${sup.takenToday ? 'bg-emerald-500 text-white shadow-sm' : 'border-2 border-slate-300 text-transparent hover:border-rose-400'}">
+                <i data-lucide="check" class="w-5 h-5 ${sup.takenToday ? 'stroke-[3]' : ''}"></i>
+              </button>
+              <div>
+                <h4 class="text-sm font-bold ${sup.takenToday ? 'line-through text-slate-400' : 'text-slate-900'}">${sup.name}</h4>
+                <p class="text-xs text-slate-500">${sup.dosage}</p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                    <i data-lucide="clock" class="w-3 h-3 text-amber-500"></i>
+                    ${sup.time}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <button onclick="toggleSupplementToday('${sup.id}')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${sup.takenToday ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-500 hover:bg-rose-600 text-white shadow-sm shadow-rose-500/20'}">
+              ${sup.takenToday ? 'Sudah Diminum' : 'Minum Sekarang'}
+            </button>
+          </div>
+          ${sup.tip ? `
+            <div class="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-500 flex items-start gap-1.5">
+              <i data-lucide="lightbulb" class="w-3.5 h-3.5 text-amber-500 flex-shrink-0 mt-0.5"></i>
+              <span>${sup.tip}</span>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    function renderJournal() {
+      const tableBody = document.getElementById('vitals-table-body');
+      tableBody.innerHTML = appData.vitals.slice(0, 7).map(v => {
+        const isHigh = v.sys >= 140 || v.dia >= 90;
+        const isPre = v.sys >= 120 || v.dia >= 80;
+        let bpClass = isHigh ? 'text-red-600 font-bold' : (isPre ? 'text-amber-600 font-semibold' : 'text-emerald-700 font-semibold');
+
+        return `
+          <tr class="hover:bg-slate-50/80 transition">
+            <td class="py-2.5 font-medium text-slate-900">${v.date.split(' ')[0]}</td>
+            <td class="py-2.5 ${bpClass}">
+              ${v.sys}/${v.dia}
+              ${isHigh ? '⚠️' : ''}
+            </td>
+            <td class="py-2.5 font-semibold text-slate-800">${v.weight} kg</td>
+            <td class="py-2.5 text-slate-600">
+              <span class="truncate block max-w-[140px]">${(v.symptoms || []).join(', ') || v.notes || '-'}</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      renderCharts();
+    }
+
+    function renderCharts() {
+      // 1. Blood Pressure Chart
+      const bpCtx = document.getElementById('bpChart');
+      if (bpCtx) {
+        const chronological = [...appData.vitals].reverse();
+        const labels = chronological.map(v => v.date.split(' ')[0].slice(5)); // MM-DD
+        const sysData = chronological.map(v => v.sys);
+        const diaData = chronological.map(v => v.dia);
+
+        if (bpChartInstance) bpChartInstance.destroy();
+
+        bpChartInstance = new Chart(bpCtx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Sistolik (Sys)',
+                data: sysData,
+                borderColor: '#F43F5E',
+                backgroundColor: 'rgba(244, 63, 94, 0.1)',
+                tension: 0.35,
+                borderWidth: 2,
+                pointRadius: 4,
+                pointBackgroundColor: '#F43F5E'
+              },
+              {
+                label: 'Diastolik (Dia)',
+                data: diaData,
+                borderColor: '#3B82F6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.35,
+                borderWidth: 2,
+                pointRadius: 4,
+                pointBackgroundColor: '#3B82F6'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }
+            },
+            scales: {
+              y: { min: 60, max: 160, ticks: { font: { size: 9 } } },
+              x: { ticks: { font: { size: 9 } } }
+            }
+          }
+        });
+      }
+
+      // 2. Weight Chart
+      const weightCtx = document.getElementById('weightChart');
+      if (weightCtx) {
+        const chronological = [...appData.vitals].reverse();
+        const labels = chronological.map(v => v.date.split(' ')[0].slice(5));
+        const weights = chronological.map(v => v.weight);
+
+        if (weightChartInstance) weightChartInstance.destroy();
+
+        weightChartInstance = new Chart(weightCtx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Berat Badan (kg)',
+                data: weights,
+                borderColor: '#10B981',
+                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                tension: 0.35,
+                borderWidth: 2.5,
+                fill: true,
+                pointRadius: 4,
+                pointBackgroundColor: '#10B981'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }
+            },
+            scales: {
+              y: { ticks: { font: { size: 9 } } },
+              x: { ticks: { font: { size: 9 } } }
+            }
+          }
+        });
+      }
+    }
+
+    function renderPrep() {
+      // Filter by current category
+      const filtered = appData.checklist.filter(c => c.cat === currentPrepCategory);
+      const totalInAll = appData.checklist.length;
+      const checkedInAll = appData.checklist.filter(c => c.checked).length;
+      const percent = Math.round((checkedInAll / totalInAll) * 100);
+
+      document.getElementById('prep-readiness-percent').textContent = `${percent}% Siap`;
+      document.getElementById('prep-progress-bar').style.width = `${percent}%`;
+      document.getElementById('prep-items-count-text').textContent = `${checkedInAll} dari ${totalInAll} perlengkapan siap di dalam tas.`;
+
+      const listContainer = document.getElementById('prep-items-list');
+      listContainer.innerHTML = filtered.map(item => `
+        <div class="flex items-center justify-between p-3 rounded-2xl border ${item.checked ? 'bg-emerald-50/60 border-emerald-200' : 'bg-white border-slate-100 shadow-sm'} transition">
+          <div class="flex items-center space-x-3 flex-1">
+            <button onclick="toggleChecklistItem('${item.id}')" class="w-6 h-6 rounded-lg flex items-center justify-center transition flex-shrink-0 ${item.checked ? 'bg-emerald-500 text-white' : 'border-2 border-slate-300 text-transparent hover:border-emerald-400'}">
+              <i data-lucide="check" class="w-3.5 h-3.5 ${item.checked ? 'stroke-[3]' : ''}"></i>
+            </button>
+            <span class="text-xs font-semibold ${item.checked ? 'line-through text-slate-400' : 'text-slate-800'}">${item.name}</span>
+          </div>
+          <button onclick="deleteChecklistItem('${item.id}')" class="text-slate-300 hover:text-red-500 p-1">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function setPrepCategory(cat) {
+      currentPrepCategory = cat;
+      ['docs', 'mom', 'baby', 'p4k'].forEach(c => {
+        const btn = document.getElementById(`prep-cat-${c}`);
+        if (c === cat) {
+          btn.className = "px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 bg-rose-500 text-white shadow-sm flex-shrink-0";
+        } else {
+          btn.className = "px-3 py-1.5 rounded-xl font-bold transition flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 flex-shrink-0";
+        }
+      });
+      renderPrep();
+      lucide.createIcons();
+    }
+
+    function renderEmergencyDial() {
+      const container = document.getElementById('emergency-speed-dial-buttons');
+      const partnerPhone = appData.profile.partnerPhone || "6281234567890";
+      const midwifePhone = appData.profile.midwifePhone || "6281987654321";
+
+      container.innerHTML = `
+        <a href="tel:${partnerPhone}" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs transition border border-white/20">
+          <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+          <span>Telepon Suami</span>
+        </a>
+        <a href="https://wa.me/${partnerPhone}?text=Halo%20Ayah,%20ini%20darurat%20kehamilan%20Bunda.%20Tolong%20segera%20hubungi%20Bunda!" target="_blank" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs transition shadow-sm">
+          <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+          <span>WA Suami</span>
+        </a>
+        <a href="tel:${midwifePhone}" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs transition border border-white/20">
+          <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+          <span>Telepon Bidan</span>
+        </a>
+        <a href="tel:119" class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold text-xs transition shadow-sm">
+          <i data-lucide="ambulance" class="w-3.5 h-3.5"></i>
+          <span>Ambulans 119</span>
+        </a>
+      `;
+    }
+
+    function checkVitalsAlert() {
+      const alertBanner = document.getElementById('urgent-vitals-alert');
+      if (appData.vitals.length > 0) {
+        const latest = appData.vitals[0];
+        if (latest.sys >= 140 || latest.dia >= 90) {
+          alertBanner.classList.remove('hidden');
+          document.getElementById('urgent-alert-text').textContent = `Perhatian: Tensi terakhir (${latest.sys}/${latest.dia} mmHg) berada di atas batas normal! Segera konsultasikan ke Bidan/Dokter.`;
+          return;
+        }
+      }
+      alertBanner.classList.add('hidden');
+    }
+
+    // ==========================================
+    // 5. USER ACTIONS & INTERACTIVITY
+    // ==========================================
+    function switchTab(tabId) {
+      const tabs = ['home', 'schedule', 'supplements', 'journal', 'warning', 'prep'];
+      tabs.forEach(t => {
+        const el = document.getElementById(`tab-${t}`);
+        const navBtn = document.getElementById(`nav-btn-${t}`);
+        if (t === tabId) {
+          el.classList.remove('hidden');
+          navBtn.classList.remove('text-slate-400');
+          navBtn.classList.add('text-rose-600', 'font-bold');
+        } else {
+          el.classList.add('hidden');
+          navBtn.classList.remove('text-rose-600', 'font-bold');
+          navBtn.classList.add('text-slate-400', 'font-medium');
+        }
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      lucide.createIcons();
+    }
+
+    function toggleSupplementToday(id) {
+      const sup = appData.supplements.find(s => s.id === id);
+      if (sup) {
+        sup.takenToday = !sup.takenToday;
+        saveState();
+        if (sup.takenToday) {
+          playChime('success');
+          confetti({
+            particleCount: 40,
+            spread: 60,
+            origin: { y: 0.8 },
+            colors: ['#FB7185', '#10B981', '#F59E0B']
+          });
+        }
+        renderHome();
+        renderSupplements();
+        lucide.createIcons();
+      }
+    }
+
+    function toggleVisitDone(id) {
+      const v = appData.visits.find(item => item.id === id);
+      if (v) {
+        v.done = !v.done;
+        saveState();
+        if (v.done) {
+          playChime('success');
+          confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
+        }
+        renderAll();
+      }
+    }
+
+    function toggleChecklistItem(id) {
+      const item = appData.checklist.find(c => c.id === id);
+      if (item) {
+        item.checked = !item.checked;
+        saveState();
+        if (item.checked) playChime('success');
+        renderPrep();
+        lucide.createIcons();
+      }
+    }
+
+    function deleteChecklistItem(id) {
+      appData.checklist = appData.checklist.filter(c => c.id !== id);
+      saveState();
+      renderPrep();
+      lucide.createIcons();
+    }
+
+    function sendVisitWhatsAppReminder(visitId) {
+      let visit = appData.visits.find(v => v.id === visitId);
+      if (!visit) visit = appData.visits.find(v => !v.done);
+      if (!visit) return;
+
+      const momName = appData.profile.name || "Bunda";
+      const stats = calculateGestationalStats();
+      const text = encodeURIComponent(
+        `Halo Ayah / Bidan,\n\nPengingat Jadwal Pemeriksaan Kehamilan Mother's Care:\n` +
+        `👤 Pasien: ${momName}\n` +
+        `🤰 Usia Kehamilan: ${stats.weeks} Minggu ${stats.days} Hari\n` +
+        `📅 Tanggal: ${visit.date}\n` +
+        `🩺 Layanan: ${visit.title}\n` +
+        `📍 Faskes: ${visit.provider}\n\n` +
+        `Jangan lupa membawa Buku KIA (buku pink), KTP, dan kartu BPJS ya! 💕`
+      );
+      window.open(`https://wa.me/?text=${text}`, '_blank');
+    }
+
+    function triggerEmergencySOSWhatsApp() {
+      const stats = calculateGestationalStats();
+      const partner = appData.profile.partnerPhone || "";
+      const text = encodeURIComponent(
+        `🚨 PEMBERITAHUAN DARURAT KEHAMILAN - MOTHER'S CARE 🚨\n\n` +
+        `Nama Bunda: ${appData.profile.name}\n` +
+        `Usia Kehamilan: ${stats.weeks} Minggu ${stats.days} Hari\n` +
+        `HPL: ${appData.profile.edd}\n` +
+        `RSUD Rujukan: ${appData.profile.hospitalName}\n\n` +
+        `Bunda saat ini mengalami gejala darurat yang memerlukan pertolongan segera! Mohon segera telepon atau dampingi ke fasilitas kesehatan sekarang!`
+      );
+      window.open(`https://wa.me/${partner}?text=${text}`, '_blank');
+    }
+
+    // ==========================================
+    // 6. 10-KICK COUNTER (CARDIFF PROTOCOL)
+    // ==========================================
+    function openKickModal() {
+      document.getElementById('kick-modal').classList.remove('hidden');
+      kickSeconds = 0;
+      kickSessionCount = 0;
+      updateKickUI();
+      if (kickTimer) clearInterval(kickTimer);
+      kickTimer = setInterval(() => {
+        kickSeconds++;
+        const mins = Math.floor(kickSeconds / 60).toString().padStart(2, '0');
+        const secs = (kickSeconds % 60).toString().padStart(2, '0');
+        document.getElementById('kick-stopwatch').textContent = `${mins}:${secs}`;
+      }, 1000);
+      lucide.createIcons();
+    }
+
+    function closeKickModal() {
+      if (kickTimer) clearInterval(kickTimer);
+      document.getElementById('kick-modal').classList.add('hidden');
+    }
+
+    function registerKick() {
+      if (kickSessionCount < 10) {
+        kickSessionCount++;
+        playChime('kick');
+        updateKickUI();
+
+        if (kickSessionCount === 10) {
+          clearInterval(kickTimer);
+          playChime('success');
+          confetti({ particleCount: 70, spread: 80, origin: { y: 0.5 } });
+          const mins = Math.max(1, Math.round(kickSeconds / 60));
+          alert(`Alhamdulillah! 10 tendangan tercapai dalam waktu ${mins} menit. Gerakan janin sangat aktif dan sehat! 🎉`);
+        }
+      }
+    }
+
+    function updateKickUI() {
+      document.getElementById('current-kick-count').textContent = kickSessionCount;
+      const dotsContainer = document.getElementById('kick-dots-container');
+      dotsContainer.innerHTML = Array.from({ length: 10 }).map((_, i) => `
+        <span class="w-3 h-3 rounded-full transition-all ${i < kickSessionCount ? 'bg-rose-500 scale-110 shadow-sm' : 'bg-slate-200'}"></span>
+      `).join('');
+    }
+
+    function resetKickSession() {
+      kickSeconds = 0;
+      kickSessionCount = 0;
+      document.getElementById('kick-stopwatch').textContent = "00:00";
+      updateKickUI();
+    }
+
+    function finishKickSession() {
+      const mins = Math.max(1, Math.round(kickSeconds / 60));
+      appData.kickHistory = {
+        lastDurationMinutes: mins,
+        lastDate: new Date().toISOString().split('T')[0],
+        count: kickSessionCount
+      };
+      saveState();
+      document.getElementById('last-kick-session-info').textContent = `Hari ini (${kickSessionCount} tendangan dlm ${mins} mnt)`;
+      closeKickModal();
+    }
+
+    // ==========================================
+    // 7. MODALS & FORMS HANDLING
+    // ==========================================
+    function openVitalsModal() {
+      document.getElementById('input-vital-date').value = new Date().toISOString().slice(0, 16);
+      document.getElementById('vitals-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+    function closeVitalsModal() {
+      document.getElementById('vitals-modal').classList.add('hidden');
+    }
+    function toggleSymptomChip(btn) {
+      btn.classList.toggle('bg-rose-500');
+      btn.classList.toggle('text-white');
+      btn.classList.toggle('border-rose-500');
+    }
+    function saveVitals(e) {
+      e.preventDefault();
+      const dateVal = document.getElementById('input-vital-date').value.replace('T', ' ');
+      const sysVal = parseInt(document.getElementById('input-vital-sys').value);
+      const diaVal = parseInt(document.getElementById('input-vital-dia').value);
+      const weightVal = parseFloat(document.getElementById('input-vital-weight').value);
+      const notesVal = document.getElementById('input-vital-notes').value;
+
+      // Collect selected symptoms
+      const selected = [];
+      document.querySelectorAll('#symptoms-chips button.bg-rose-500').forEach(b => selected.push(b.textContent.trim()));
+
+      appData.vitals.unshift({
+        id: "vit-" + Date.now(),
+        date: dateVal,
+        sys: sysVal,
+        dia: diaVal,
+        weight: weightVal,
+        symptoms: selected,
+        notes: notesVal
+      });
+
+      saveState();
+      playChime('success');
+      closeVitalsModal();
+      renderAll();
+
+      if (sysVal >= 140 || diaVal >= 90) {
+        alert("⚠️ Perhatian: Tekanan darah tergolong tinggi (≥140/90 mmHg). Harap istirahat dan hubungi bidan/dokter!");
+      }
+    }
+
+    function openAddVisitModal() {
+      document.getElementById('visit-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+    function closeVisitModal() {
+      document.getElementById('visit-modal').classList.add('hidden');
+    }
+    function saveCustomVisit(e) {
+      e.preventDefault();
+      appData.visits.push({
+        id: "vis-" + Date.now(),
+        title: document.getElementById('input-visit-title').value,
+        week: "Tambahan",
+        date: document.getElementById('input-visit-date').value,
+        provider: document.getElementById('input-visit-provider').value,
+        notes: document.getElementById('input-visit-notes').value,
+        done: false
+      });
+      saveState();
+      playChime('success');
+      closeVisitModal();
+      renderAll();
+    }
+
+    function openAddSuppModal() {
+      document.getElementById('supp-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+    function closeSuppModal() {
+      document.getElementById('supp-modal').classList.add('hidden');
+    }
+    function saveCustomSupplement(e) {
+      e.preventDefault();
+      appData.supplements.push({
+        id: "sup-" + Date.now(),
+        name: document.getElementById('input-supp-name').value,
+        dosage: document.getElementById('input-supp-dosage').value,
+        time: document.getElementById('input-supp-time').value,
+        takenToday: false,
+        tip: "Pastikan diminum teratur sesuai anjuran bidan/dokter."
+      });
+      saveState();
+      playChime('success');
+      closeSuppModal();
+      renderAll();
+    }
+
+    function openAddChecklistItemModal() {
+      document.getElementById('checklist-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+    function closeChecklistModal() {
+      document.getElementById('checklist-modal').classList.add('hidden');
+    }
+    function saveCustomChecklistItem(e) {
+      e.preventDefault();
+      const cat = document.getElementById('input-check-cat').value;
+      const name = document.getElementById('input-check-name').value;
+      appData.checklist.push({
+        id: "c-" + Date.now(),
+        cat: cat,
+        name: name,
+        checked: false
+      });
+      saveState();
+      playChime('success');
+      closeChecklistModal();
+      setPrepCategory(cat);
+    }
+
+    function openSettingsModal() {
+      document.getElementById('input-profile-name').value = appData.profile.name || "";
+      document.getElementById('input-profile-lmp').value = appData.profile.lmp || "";
+      document.getElementById('input-profile-edd').value = appData.profile.edd || "";
+      document.getElementById('input-profile-preweight').value = appData.profile.preWeight || 52;
+      document.getElementById('input-partner-name').value = appData.profile.partnerName || "";
+      document.getElementById('input-partner-phone').value = appData.profile.partnerPhone || "";
+      document.getElementById('input-midwife-name').value = appData.profile.midwifeName || "";
+      document.getElementById('input-midwife-phone').value = appData.profile.midwifePhone || "";
+      document.getElementById('input-hospital-name').value = appData.profile.hospitalName || "";
+      document.getElementById('settings-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+    function closeSettingsModal() {
+      document.getElementById('settings-modal').classList.add('hidden');
+    }
+    function saveUserProfile(e) {
+      e.preventDefault();
+      appData.profile.name = document.getElementById('input-profile-name').value;
+      appData.profile.lmp = document.getElementById('input-profile-lmp').value;
+      appData.profile.edd = document.getElementById('input-profile-edd').value;
+      appData.profile.preWeight = parseFloat(document.getElementById('input-profile-preweight').value);
+      appData.profile.partnerName = document.getElementById('input-partner-name').value;
+      appData.profile.partnerPhone = document.getElementById('input-partner-phone').value;
+      appData.profile.midwifeName = document.getElementById('input-midwife-name').value;
+      appData.profile.midwifePhone = document.getElementById('input-midwife-phone').value;
+      appData.profile.hospitalName = document.getElementById('input-hospital-name').value;
+      saveState();
+      playChime('success');
+      closeSettingsModal();
+      renderAll();
+    }
+
+    // ==========================================
+    // 8. MIDWIFE REPORT VIEW (BUKU KIA PRINT)
+    // ==========================================
+    function openMidwifeReportModal() {
+      const stats = calculateGestationalStats();
+      document.getElementById('rep-mom-name').textContent = appData.profile.name;
+      document.getElementById('rep-lmp').textContent = appData.profile.lmp || "-";
+      document.getElementById('rep-edd').textContent = appData.profile.edd;
+      document.getElementById('rep-ga').textContent = `${stats.weeks} Minggu ${stats.days} Hari`;
+      document.getElementById('rep-preweight').textContent = `${appData.profile.preWeight || 52} kg`;
+      document.getElementById('rep-midwife').textContent = appData.profile.midwifeName;
+      document.getElementById('report-print-date').textContent = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+
+      const tableRows = document.getElementById('rep-vitals-rows');
+      tableRows.innerHTML = appData.vitals.slice(0, 5).map(v => {
+        const gain = (v.weight - (appData.profile.preWeight || 52)).toFixed(1);
+        const evalStr = (v.sys >= 140 || v.dia >= 90) ? "WASPADA Tensi Tinggi" : "Normal";
+        return `
+          <tr>
+            <td class="p-1.5 border border-slate-200">${v.date}</td>
+            <td class="p-1.5 border border-slate-200 font-bold ${v.sys >= 140 ? 'text-red-600' : ''}">${v.sys}/${v.dia}</td>
+            <td class="p-1.5 border border-slate-200">${v.weight} kg</td>
+            <td class="p-1.5 border border-slate-200">+${gain} kg</td>
+            <td class="p-1.5 border border-slate-200">${evalStr}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('midwife-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+    function closeMidwifeReportModal() {
+      document.getElementById('midwife-modal').classList.add('hidden');
+    }
+
+    // ==========================================
+    // 9. BACKUP & DEMO DATA CONTROLLER
+    // ==========================================
+    function loadSampleDemoData() {
+      if (confirm("Muat data contoh demo? (Data yang ada saat ini akan diganti dengan profil kehamilan lengkap)")) {
+        appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        saveState();
+        closeSettingsModal();
+        renderAll();
+        playChime('success');
+      }
+    }
+
+    function exportDataBackup() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `mothers_care_backup_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function toggleLanguage() {
+      appData.lang = appData.lang === 'id' ? 'en' : 'id';
+      saveState();
+      renderHeader();
+      alert(appData.lang === 'id' ? "Bahasa diubah ke Bahasa Indonesia" : "Switched to English interface mode");
+    }
+
+    // ==========================================
+    // 10. INITIALIZATION ON PAGE LOAD
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+      renderAll();
+    });
+  </script>
+</body>
+</html>
